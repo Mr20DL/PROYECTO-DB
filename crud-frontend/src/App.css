@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@plugin "daisyui"{
+  theme:night;
+}
+
+.modal-box {
+  max-width: 800px;
+  width: 90%;
+}
+
+.table td, .table th {
+  padding: 0.5rem;
+  white-space: nowrap;
+}
+
+
