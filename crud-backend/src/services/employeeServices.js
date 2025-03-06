@@ -1,4 +1,4 @@
-import { query } from "../db.js"
+import { query, getClient } from "../db.js"
 
 export const getEmployees = async() => {
   const {rows} = await query('SELECT e.*, p.nombre as puesto, d.nombre as departamento FROM empleados e LEFT JOIN puestos p ON e.puesto_id = p.id LEFT JOIN departamentos d ON p.departamento_id = d.id');
@@ -33,8 +33,30 @@ export const updateEmployee = async (employeeId, employeeData) => {
 };
 
 export const deleteEmployee = async (employeeId) => {
-    const { rowCount } = await query('DELETE FROM empleados WHERE id = $1', [employeeId]);
+  const client = await getClient();
+  try {
+    await client.query('BEGIN');
+    
+    // Eliminar relaciones en empleado_capacitacion
+    await client.query(
+      'DELETE FROM empleado_capacitacion WHERE empleado_id = $1',
+      [employeeId]
+    );
+
+    // Eliminar empleado
+    const { rowCount } = await client.query(
+      'DELETE FROM empleados WHERE id = $1',
+      [employeeId]
+    );
+    
+    await client.query('COMMIT');
     return rowCount > 0;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 export const searchEmployees = async (searchTerm) => {

@@ -2,6 +2,7 @@ import './App.css'
 import NavBar from './components/NavBar'
 import TableList from './components/TableList'
 import ModalForm from './components/ModalForm'
+import Reportes from './components/Reportes';
 import { useState, useEffect } from 'react'
 import axios from 'axios';
 
@@ -12,7 +13,7 @@ function App() {
   const [employeeData, setEmployeeData] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
-
+  const [vistaActual, setVistaActual] = useState('empleados');
 
   const fetchEmployees = async () => {
     try {
@@ -62,23 +63,40 @@ function App() {
 
   return (
     <>
-      <NavBar onOpen={() => handleOpen('add')} onSearch={setSearchTerm} />
-      <TableList setTableData={setTableData} tableData={tableData}
-      handleOpen={handleOpen} searchTerm={searchTerm}
-      onShowCapacitaciones={setSelectedEmployeeId}
+      <NavBar
+        onOpen={() => handleOpen('add')}
+        onSearch={setSearchTerm}
+        onViewChange={setVistaActual}
       />
-      <ModalForm 
-      isOpen={isOpen} OnSubmit={handleSubmit}
-      onClose={() => setIsOpen(false)}
-      mode={modalMode} employeeData={employeeData}
-      />
-      {selectedEmployeeId && (
-        <EmployeeCapacitaciones 
-        empleadoId={selectedEmployeeId} 
-        onClose={() => setSelectedEmployeeId(null)}
-      />)}
+
+      {vistaActual === 'empleados' ? (
+        <>
+          <TableList
+            setTableData={setTableData}
+            tableData={tableData}
+            handleOpen={handleOpen}
+            searchTerm={searchTerm}
+            onShowCapacitaciones={setSelectedEmployeeId}
+          />
+          <ModalForm
+            isOpen={isOpen}
+            OnSubmit={handleSubmit}
+            onClose={() => setIsOpen(false)}
+            mode={modalMode}
+            employeeData={employeeData}
+          />
+          {selectedEmployeeId && (
+            <EmployeeCapacitaciones
+              empleadoId={selectedEmployeeId}
+              onClose={() => setSelectedEmployeeId(null)}
+            />
+          )}
+        </>
+      ) : (
+        <Reportes />
+      )}
     </>
-  )
+  );
 }
 
 export default App
